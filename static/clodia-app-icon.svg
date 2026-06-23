@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Clodia">
+  <rect width="512" height="512" rx="108" fill="#101116"/>
+  <circle cx="136" cy="142" r="46" fill="#6ee7b7"/>
+  <circle cx="376" cy="142" r="46" fill="#f97373"/>
+  <path d="M112 254c0-30.9 25.1-56 56-56h176c30.9 0 56 25.1 56 56v80c0 30.9-25.1 56-56 56H168c-30.9 0-56-25.1-56-56v-80Z" fill="#f4f4f5"/>
+  <path d="M164 276h184M164 326h128" stroke="#101116" stroke-width="28" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,16 @@
+[Unit]
+Description=Clodia PWA
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/clodia-pwa/clodia-pwa
+Environment=HOST=0.0.0.0
+Environment=PORT=5173
+Environment=API_TARGET=http://127.0.0.1:7842
+ExecStart=/usr/bin/node /opt/clodia-pwa/clodia-pwa/server.mjs
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
