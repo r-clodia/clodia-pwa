@@ -25,15 +25,17 @@
   }
 
   function topicColor(tier) {
-    const t = String(tier || 'P0').toUpperCase();
-    if (t === 'P3') return '#ef4444';
-    if (t === 'P2') return '#f59e0b';
-    if (t === 'P1') return '#60a5fa';
+    const t = String(tier || 'SEAL-0').toUpperCase().replace(/^P(\d)$/, 'SEAL-$1');
+    if (t === 'SEAL-4') return '#a855f7';
+    if (t === 'SEAL-3') return '#ef4444';
+    if (t === 'SEAL-2') return '#f59e0b';
+    if (t === 'SEAL-1') return '#60a5fa';
     return '#94a3b8';
   }
 
   function privacyClass(tier) {
-    return String(tier || 'P0').toUpperCase() === 'P3' ? 'privacy-confidential' : 'privacy-personal';
+    const t = String(tier || 'SEAL-0').toUpperCase().replace(/^P(\d)$/, 'SEAL-$1');
+    return (t === 'SEAL-3' || t === 'SEAL-4') ? 'privacy-confidential' : 'privacy-personal';
   }
 
   function topicStatus(topic) {
