@@ -201,7 +201,7 @@
               <span class="topic-meta">
                 <span>{formatDate(topic.last_commit)}</span>
                 <span class="privacy {privacyClass(topic.tier)}">
-                  {topic.tier_name || topic.tier}
+                  {topic.tier}{topic.tier_name ? ' · ' + topic.tier_name : ''}
                 </span>
                 <span class="status-pill {statusClass(topicStatus(topic))}">
                   {topicStatus(topic)}
