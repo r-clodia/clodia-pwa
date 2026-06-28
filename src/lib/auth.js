@@ -79,19 +79,43 @@ async function whoami(token) {
   return res.json();
 }
 
-export async function login(recoveryB64) {
+const LS_REMEMBER = 'clodia_remember'; // { principal, mk } se "ricordami" attivo
+
+export async function login(recoveryB64, remember = false) {
   if (!recoveryB64.trim()) throw new Error('Incolla la tua masterkey (recovery key)');
   const probe = await signToken('', recoveryB64, 600);
   const { principal } = await whoami(probe.token);
   const { token, exp } = await signToken(principal, recoveryB64);
   _current = { principal, token, exp };
   localStorage.setItem(LS_KEY, JSON.stringify(_current));
+  // "Ricordami su questo dispositivo": salva la masterkey per ri-firmare il token
+  // alla scadenza senza richiederla. Resta in localStorage di questo browser.
+  if (remember) localStorage.setItem(LS_REMEMBER, JSON.stringify({ principal, mk: recoveryB64 }));
   session.set(_current);
+}
+
+/** Al boot: se la sessione è scaduta/assente ma "ricordami" è attivo, ri-firma un
+ *  token dalla masterkey salvata — così non viene richiesta a ogni apertura. */
+export async function restore() {
+  if (_current) return _current;
+  let r;
+  try { r = JSON.parse(localStorage.getItem(LS_REMEMBER) || 'null'); } catch { r = null; }
+  if (!r?.mk || !r?.principal) return null;
+  try {
+    const { token, exp } = await signToken(r.principal, r.mk);
+    _current = { principal: r.principal, token, exp };
+    localStorage.setItem(LS_KEY, JSON.stringify(_current));
+    session.set(_current);
+    return _current;
+  } catch {
+    return null;
+  }
 }
 
 export function logout() {
   _current = null;
   localStorage.removeItem(LS_KEY);
+  localStorage.removeItem(LS_REMEMBER);
   session.set(null);
 }
 

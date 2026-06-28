@@ -1,17 +1,21 @@
 <script>
+  import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { session, login, logout } from '$lib/auth.js';
+  import { session, login, logout, restore } from '$lib/auth.js';
 
   let recovery = '';
+  let remember = true;
   let busy = false;
   let err = '';
+
+  onMount(() => { restore(); });
 
   async function doLogin() {
     if (busy) return;
     busy = true;
     err = '';
     try {
-      await login(recovery.trim());
+      await login(recovery.trim(), remember);
       recovery = '';
     } catch (e) {
       err = e?.message || String(e);
@@ -30,6 +34,7 @@
       <div class="brand"><span class="dot">●</span> Clodia</div>
       <p class="sub">Incolla la tua <strong>masterkey</strong> (recovery key) per accedere.</p>
       <textarea bind:value={recovery} rows="4" placeholder="masterkey (pkcs8 base64)" autocomplete="off"></textarea>
+      <label class="remember"><input type="checkbox" bind:checked={remember} /> Ricordami su questo dispositivo</label>
       {#if err}<div class="err">{err}</div>{/if}
       <button class="primary" on:click={doLogin} disabled={busy || !recovery.trim()}>
         {busy ? 'Accesso…' : 'Accedi'}
@@ -68,7 +73,8 @@
   .brand .dot { color: #ff6b3d; }
   .sub { margin: 0; font-size: 13px; color: #9fb0c0; }
   textarea { background: #0b0f14; border: 1px solid #243040; color: #e6edf3; border-radius: 8px; padding: 10px; font: inherit; font-size: 13px; resize: none; }
-  .err { color: #e85d75; font-size: 12px; }
+  .remember { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #9fb0c0; }
+
   button.primary { background: #ff6b3d; border: none; color: #1a1208; font-weight: 700; padding: 11px; border-radius: 9px; font-size: 14px; }
   button.primary:disabled { opacity: .5; }
 
