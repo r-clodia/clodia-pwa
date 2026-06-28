@@ -14,11 +14,22 @@
   let showArchived = false;
   let expandedTopics = {};
   let missingPfps = {};
+  let query = '';
 
   $: archivedCount = topics.filter((topic) => topicStatus(topic) === 'archived').length;
   $: filteredTopics = topics
-    .filter((topic) => showArchived || topicStatus(topic) !== 'archived')
-    .toSorted((a, b) => commitTime(b) - commitTime(a));
+    .filter((topic) => (showArchived || topicStatus(topic) !== 'archived') && matchesQuery(topic))
+    .toSorted((a, b) => accessTime(b) - accessTime(a));
+
+  function matchesQuery(topic) {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      String(topic.title || '').toLowerCase().includes(q) ||
+      String(topic.name || '').toLowerCase().includes(q) ||
+      String(topic.tldr || '').toLowerCase().includes(q)
+    );
+  }
 
   function renderMarkdown(text) {
     return DOMPurify.sanitize(marked.parse(text || '_Nessun TLDR disponibile._'));
@@ -66,6 +77,13 @@
 
   function commitTime(topic) {
     const t = Date.parse(topic.last_commit || '');
+    return Number.isNaN(t) ? 0 : t;
+  }
+
+  // Ordina per ultimo accesso dalla UI (fallback all'ultimo aggiornamento):
+  // i topic consultati più di recente salgono in cima.
+  function accessTime(topic) {
+    const t = Date.parse(topic.last_accessed || topic.last_commit || '');
     return Number.isNaN(t) ? 0 : t;
   }
 
@@ -164,6 +182,21 @@
     </section>
   {/if}
 
+  <div class="search-bar">
+    <span class="search-ico" aria-hidden="true">🔎</span>
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Cerca un topic…"
+      bind:value={query}
+      autocomplete="off"
+      aria-label="Cerca topic"
+    />
+    {#if query}
+      <button type="button" class="search-clear" on:click={() => (query = '')} aria-label="Pulisci ricerca">✕</button>
+    {/if}
+  </div>
+
   <label class="archive-toggle">
     <input type="checkbox" bind:checked={showArchived} />
     <span>Mostra archived</span>
@@ -180,7 +213,9 @@
       <span>{error}</span>
     </section>
   {:else if filteredTopics.length === 0}
-    <section class="state">Nessun topic in questa vista.</section>
+    <section class="state">
+      {query.trim() ? `Nessun topic corrisponde a «${query}».` : 'Nessun topic in questa vista.'}
+    </section>
   {:else}
     <section class="topic-list" aria-label="Anteprime topic">
       {#each filteredTopics as topic (topic.tier + '/' + topic.name)}
@@ -364,6 +399,45 @@
   .segmented button.active {
     background: #f4f4f5;
     color: #111217;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid #2d2f3a;
+    border-radius: 8px;
+    background: #171922;
+  }
+  .search-bar:focus-within {
+    border-color: #3b82f6;
+  }
+  .search-ico {
+    font-size: 15px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: #f4f4f5;
+    font-size: 15px;
+    outline: none;
+  }
+  .search-input::placeholder {
+    color: #71717a;
+  }
+  .search-clear {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: #a1a1aa;
+    font-size: 16px;
+    padding: 2px 6px;
   }
 
   .archive-toggle {
