@@ -145,17 +145,18 @@
 {/if}
 
 <style>
-  :global(*) { box-sizing: border-box; }
-  :global(html, body) { margin: 0; width: 100%; max-width: 100%; height: 100%; overflow-x: hidden; background: #0b0f14; color: #e6edf3; font-family: -apple-system, system-ui, sans-serif; }
+  :global(*) { box-sizing: border-box; min-width: 0; }
+  :global(html, body) { margin: 0; width: 100%; max-width: 100%; height: 100%; overflow-x: hidden; background: #0b0f14; color: #e6edf3; font-family: -apple-system, system-ui, sans-serif; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   :global(body) { overflow: hidden; }
   :global(input, textarea, select, button) { max-width: 100%; }
-  :global(#svelte) { width: 100%; max-width: 100%; overflow-x: hidden; }
+  :global(input:not([type='checkbox']):not([type='radio']), textarea, select) { font-size: 16px !important; }
+  :global(body > div) { width: 100%; max-width: 100%; overflow-x: hidden; }
   .login { width: 100%; max-width: 100%; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 20px; overflow-x: hidden; }
   .login-card { width: min(420px, 100%); min-width: 0; background: #131a22; border: 1px solid #243040; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
   .brand { font-weight: 800; font-size: 18px; letter-spacing: .02em; }
   .brand .dot { color: #ff6b3d; }
   .sub { margin: 0; font-size: 13px; color: #9fb0c0; }
-  textarea { width: 100%; min-width: 0; background: #0b0f14; border: 1px solid #243040; color: #e6edf3; border-radius: 8px; padding: 10px; font: inherit; font-size: 13px; resize: none; }
+  textarea { width: 100%; min-width: 0; background: #0b0f14; border: 1px solid #243040; color: #e6edf3; border-radius: 8px; padding: 10px; font: inherit; font-size: 16px; resize: none; }
   .remember { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #9fb0c0; }
   .scan-box { width: 100%; aspect-ratio: 1; max-height: 320px; display: grid; place-items: center; border: 1px dashed #334155; border-radius: 8px; background: #0b0f14; overflow: hidden; }
   .scan-box.active { border-style: solid; }
