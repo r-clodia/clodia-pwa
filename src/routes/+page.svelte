@@ -163,7 +163,7 @@
   <title>Clodia Topics</title>
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
   />
 </svelte:head>
 
@@ -425,7 +425,7 @@
     border: 0;
     background: transparent;
     color: #f4f4f5;
-    font-size: 15px;
+    font-size: 16px;
     outline: none;
   }
   .search-input::placeholder {

@@ -281,7 +281,7 @@
   .think-tools li { font-size: 11px; color: #9fb0bf; font-family: ui-monospace, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .think-reply { border-top: 1px solid #243040; padding-top: 8px; font-size: 13.5px; }
   .composer { flex: 0 0 auto; display: flex; gap: 8px; padding: 8px 10px; border-top: 1px solid #1c2733; background: #0d131a; }
-  .composer textarea { flex: 1 1 auto; background: #0b0f14; border: 1px solid #243040; color: #e6edf3; border-radius: 18px; padding: 9px 12px; font: inherit; font-size: 14px; resize: none; max-height: 120px; }
+  .composer textarea { flex: 1 1 auto; background: #0b0f14; border: 1px solid #243040; color: #e6edf3; border-radius: 18px; padding: 9px 12px; font: inherit; font-size: 16px; resize: none; max-height: 120px; }
   .snd { background: #ff6b3d; border: none; color: #1a1208; font-weight: 700; width: 40px; border-radius: 50%; font-size: 16px; }
   .snd:disabled { opacity: .5; }
 </style>
