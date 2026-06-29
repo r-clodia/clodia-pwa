@@ -79,6 +79,41 @@ async function whoami(token) {
   return res.json();
 }
 
+function decodeB64url(text) {
+  const clean = text.trim().replace(/-/g, '+').replace(/_/g, '/');
+  const pad = clean + '='.repeat((4 - (clean.length % 4)) % 4);
+  const raw = atob(pad);
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function parsePairingPayload(input) {
+  const text = String(input || '').trim();
+  if (!text) throw new Error('Inquadra il QR o incolla il pairing generato dal web.');
+  const encoded = text.startsWith('clodia-pairing:') ? text.slice('clodia-pairing:'.length) : text;
+  let payload;
+  try {
+    payload = JSON.parse(decodeB64url(encoded));
+  } catch (_) {
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      throw new Error('Pairing non valido.');
+    }
+  }
+  if (payload?.type !== 'clodia.pwa.pairing' || payload.version !== 1) {
+    throw new Error('Questo QR non è un pairing PWA Clodia valido.');
+  }
+  if (!payload.token || !payload.principal || !payload.exp) {
+    throw new Error('Pairing incompleto.');
+  }
+  if (Number(payload.exp) * 1000 <= Date.now()) {
+    throw new Error('Pairing scaduto. Generane uno nuovo dal web.');
+  }
+  return payload;
+}
+
 const LS_REMEMBER = 'clodia_remember'; // { principal, mk } se "ricordami" attivo
 
 export async function login(recoveryB64, remember = false) {
@@ -91,6 +126,22 @@ export async function login(recoveryB64, remember = false) {
   // "Ricordami su questo dispositivo": salva la masterkey per ri-firmare il token
   // alla scadenza senza richiederla. Resta in localStorage di questo browser.
   if (remember) localStorage.setItem(LS_REMEMBER, JSON.stringify({ principal, mk: recoveryB64 }));
+  session.set(_current);
+}
+
+export async function loginWithPairing(input) {
+  const payload = parsePairingPayload(input);
+  const identified = await whoami(payload.token);
+  if (identified?.principal !== payload.principal) {
+    throw new Error('Il pairing non corrisponde alla sessione firmata.');
+  }
+  _current = {
+    principal: payload.principal,
+    token: payload.token,
+    exp: Number(payload.exp)
+  };
+  localStorage.setItem(LS_KEY, JSON.stringify(_current));
+  localStorage.removeItem(LS_REMEMBER);
   session.set(_current);
 }
 
