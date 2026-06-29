@@ -323,9 +323,10 @@
 
 <style>
   .home {
+    width: 100%;
     padding: 14px 16px max(20px, env(safe-area-inset-bottom));
-    box-sizing: border-box;
     max-width: 100%;
+    overflow-x: hidden;
   }
 
   .topbar {
@@ -333,6 +334,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    min-width: 0;
     margin-bottom: 14px;
   }
 
@@ -372,6 +374,7 @@
   .install-card {
     display: grid;
     gap: 4px;
+    min-width: 0;
     margin-bottom: 12px;
     padding: 12px;
     border: 1px solid rgba(110, 231, 183, 0.34);
@@ -405,6 +408,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     margin-top: 12px;
     padding: 10px 12px;
     border: 1px solid #2d2f3a;
@@ -468,9 +474,12 @@
     display: grid;
     gap: 12px;
     margin-top: 14px;
+    min-width: 0;
   }
 
   .topic-card {
+    min-width: 0;
+    max-width: 100%;
     border: 1px solid #2d2f3a;
     border-radius: 8px;
     background: rgba(25, 27, 36, 0.92);
@@ -480,6 +489,7 @@
 
   .card-summary {
     width: 100%;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -582,6 +592,7 @@
   }
 
   .card-details {
+    min-width: 0;
     padding: 0 14px 14px;
   }
 
@@ -589,6 +600,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
     padding: 3px 0 12px;
   }
 
@@ -637,6 +649,7 @@
 
   .chat-link {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     width: 38px;
@@ -738,6 +751,7 @@
 
   .artifact-name {
     flex: 1;
+    min-width: 0;
     font-size: 13px;
     color: #93c5fd;
     overflow: hidden;
