@@ -43,3 +43,8 @@ PORT=5173 API_TARGET=http://127.0.0.1:7842 npm run start
 
 It serves `build/` with SPA fallback and proxies API prefixes to the local
 agent-server.
+
+## Licenza
+
+GNU AGPL v3 — con opzione di licenza commerciale: vedi [LICENSING.md](LICENSING.md).
+Le versioni fino al tag `apache2-final` restano Apache 2.0.
