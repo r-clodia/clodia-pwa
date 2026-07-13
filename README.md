@@ -46,5 +46,7 @@ agent-server.
 
 ## Licenza
 
+Copyright (C) 2026 Davide Carboni.
+
 GNU AGPL v3 — con opzione di licenza commerciale: vedi [LICENSING.md](LICENSING.md).
 Le versioni fino al tag `apache2-final` restano Apache 2.0.
