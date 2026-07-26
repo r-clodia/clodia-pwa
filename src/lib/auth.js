@@ -8,6 +8,7 @@ const LS_KEY = 'clodia_session';
 const PREFIX = 'ckt1';
 const AUD = 'keystore';
 const DEFAULT_TTL = 12 * 3600;
+const REFRESH_SKEW = 30 * 60;
 
 let _current = load();
 export const session = writable(_current);
@@ -160,6 +161,54 @@ export async function restore() {
     return _current;
   } catch {
     return null;
+  }
+}
+
+/** Rinnova proattivamente il token quando mancano meno di 30 minuti.
+ * Se il token è scaduto e non è disponibile una masterkey ricordata, termina
+ * la sessione invece di continuare a inviare richieste anonime. */
+export async function ensureFreshSession() {
+  const stored = load();
+  const now = Math.floor(Date.now() / 1000);
+  const expiringSoon = !!stored?.exp && stored.exp - now < REFRESH_SKEW;
+  if (stored && !expiringSoon) return stored;
+
+  let remembered;
+  try { remembered = JSON.parse(localStorage.getItem(LS_REMEMBER) || 'null'); } catch { remembered = null; }
+  if (remembered?.mk && remembered?.principal) {
+    try {
+      const { token, exp } = await signToken(remembered.principal, remembered.mk);
+      _current = { principal: remembered.principal, token, exp };
+      localStorage.setItem(LS_KEY, JSON.stringify(_current));
+      session.set(_current);
+      return _current;
+    } catch {
+      // La masterkey non è più utilizzabile: gestisci sotto la sessione scaduta.
+    }
+  }
+
+  if (!stored) logout();
+  return stored;
+}
+
+/** Verifica lato server che firma e principal della sessione siano ancora validi.
+ * Gli errori di rete non sloggano l'utente; un rifiuto esplicito del server sì. */
+export async function validateSession() {
+  const stored = load();
+  if (!stored) return false;
+  try {
+    const identified = await whoami(stored.token);
+    if (identified?.principal !== stored.principal) {
+      logout();
+      return false;
+    }
+    _current = stored;
+    session.set(stored);
+    return true;
+  } catch (error) {
+    if (error instanceof TypeError) return true;
+    logout();
+    return false;
   }
 }
 

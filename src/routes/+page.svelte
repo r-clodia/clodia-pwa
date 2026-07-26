@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
-  import { agentPfpUrl, listTopics } from '$lib/api.js';
+  import { agentPfpUrl, listTopics, signedChannelFileUrl } from '$lib/api.js';
 
   marked.setOptions({ breaks: true, gfm: true });
 
@@ -116,12 +116,19 @@
     return '📎';
   }
 
-  function artifactDownloadUrl(topic, artifact) {
-    // Same-origin di default (stringa vuota → URL relativo): in container il
-    // server.mjs fa da proxy verso il backend, così la PWA funziona ovunque
-    // (LAN, Tailscale) senza IP cablati. Override con VITE_PUBLIC_API_BASE_URL.
-    const base = import.meta.env.VITE_PUBLIC_API_BASE_URL || '';
-    return `${base}/topics/${topic.tier}/${topic.name}/download?path=${encodeURIComponent(artifact.path)}`;
+  async function downloadArtifact(topic, artifact) {
+    try {
+      const url = await signedChannelFileUrl(topic.tier, topic.name, artifact.path);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = artifact.name || '';
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      error = err?.message || 'Download non riuscito';
+    }
   }
 
   function fmtArtifactDate(iso) {
@@ -303,9 +310,8 @@
                         <a
                           class="artifact-name"
                           title={a.path}
-                          href={artifactDownloadUrl(topic, a)}
-                          download={a.name}
-                          on:click|stopPropagation
+                          href="#download"
+                          on:click|preventDefault|stopPropagation={() => downloadArtifact(topic, a)}
                         >{a.name}</a>
                         <span class="artifact-date">{fmtArtifactDate(a.mtime_iso)}</span>
                       </li>

@@ -14,6 +14,19 @@ export function channelFileUrl(tier, name, path) {
   return `${BASE}/topics/${encodeURIComponent(tier)}/${encodeURIComponent(name)}/download?path=${encodeURIComponent(path)}`;
 }
 
+export async function signedChannelFileUrl(tier, name, path) {
+  const r = await fetch(
+    `${BASE}/topics/${encodeURIComponent(tier)}/${encodeURIComponent(name)}/download-url?path=${encodeURIComponent(path)}`,
+    { headers: authHeaders() }
+  );
+  if (!r.ok) throw new Error(await r.text());
+  const d = await r.json();
+  const url = String(d?.url || '');
+  if (!url) throw new Error('URL di download non disponibile');
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 export async function listTopics() {
   const r = await fetch(`${BASE}/topics`, { headers: authHeaders() });
   if (!r.ok) throw new Error(await r.text());

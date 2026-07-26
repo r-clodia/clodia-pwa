@@ -22,6 +22,7 @@
   let streamEl;
   let poll;
   let missing = {};
+  let tierWarning = null;
 
   // --- Ragionamento / attività live (SSE del turno del risponditore) -------
   // Il backend emette thinking_chunk / message_chunk / tool_use sul bus, con
@@ -136,8 +137,10 @@
     if (!body || sending) return;
     sending = true;
     draft = '';
+    tierWarning = null;
     try {
-      await postChannelMessage(tier, name, body);
+      const result = await postChannelMessage(tier, name, body);
+      tierWarning = result?.warning ?? (result?.note ? { message: result.note } : null);
       await refresh();
       await tick();
       scrollDown();
@@ -186,6 +189,15 @@
   </header>
 
   {#if error}<div class="err">{error}</div>{/if}
+  {#if tierWarning}
+    <div class="tier-warning" role="alert">
+      <div>
+        <strong>Provider sotto il tier del topic</strong>
+        <p>{tierWarning.message || 'La risposta usa un provider con SEAL inferiore al tier richiesto.'}</p>
+      </div>
+      <button type="button" on:click={() => (tierWarning = null)} aria-label="Chiudi avviso">×</button>
+    </div>
+  {/if}
 
   <div class="stream" bind:this={streamEl}>
     {#each messages as m (m.id)}
@@ -249,6 +261,11 @@
   .back { color: #ff6b3d; text-decoration: none; font-size: 26px; line-height: 1; }
   .title { font-weight: 700; font-size: 16px; }
   .err { color: #e85d75; font-size: 12px; padding: 6px 12px; }
+  .tier-warning { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 10px; margin: 8px 10px 0; padding: 9px 11px; border: 1px solid #b7791f; border-left-width: 3px; border-radius: 8px; background: rgba(183,121,31,.12); color: #f6d28b; font-size: 12px; }
+  .tier-warning div { flex: 1 1 auto; }
+  .tier-warning strong { color: #ffe0a3; }
+  .tier-warning p { margin: 3px 0 0; line-height: 1.4; }
+  .tier-warning button { flex: 0 0 auto; border: 0; background: transparent; color: inherit; font-size: 18px; line-height: 1; padding: 0 2px; }
   .stream { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
   .msg { max-width: 85%; background: #131a22; border: 1px solid #243040; border-radius: 12px; padding: 8px 11px; align-self: flex-start; }
   .msg.mine { align-self: flex-end; background: #1a2530; }

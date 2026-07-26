@@ -1,7 +1,15 @@
 <script>
   import { onDestroy, onMount, tick } from 'svelte';
   import { page } from '$app/stores';
-  import { session, login, loginWithPairing, logout, restore } from '$lib/auth.js';
+  import {
+    session,
+    login,
+    loginWithPairing,
+    logout,
+    restore,
+    ensureFreshSession,
+    validateSession
+  } from '$lib/auth.js';
 
   let recovery = '';
   let remember = true;
@@ -12,9 +20,23 @@
   let stream;
   let busy = false;
   let err = '';
+  let sessionTimer;
 
-  onMount(() => { restore(); });
-  onDestroy(stopScan);
+  function onVisible() {
+    if (document.visibilityState === 'visible') void ensureFreshSession();
+  }
+
+  onMount(async () => {
+    await restore();
+    await validateSession();
+    sessionTimer = setInterval(() => void ensureFreshSession(), 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', onVisible);
+  });
+  onDestroy(() => {
+    stopScan();
+    if (sessionTimer) clearInterval(sessionTimer);
+    document.removeEventListener('visibilitychange', onVisible);
+  });
 
   async function doLogin() {
     if (busy) return;
