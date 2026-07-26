@@ -31,19 +31,41 @@
   let liveReply = '';
   let liveTools = [];
   let thinkOpen = true;
-  let typing = false;
-  let typingTimer;
+  let typing = [];
+  let workingResponders = [];
+  const typingTimers = {};
   $: hasLive = !!(liveThink || liveReply || liveTools.length);
+  $: activeWorking = Array.from(new Set([...typing, ...workingResponders]));
+  $: typingLabel =
+    activeWorking.length === 0
+      ? ''
+      : `${activeWorking.join(' e ')} ${activeWorking.length === 1 ? 'sta scrivendo' : 'stanno scrivendo'}…`;
   function resetLive() {
     liveThink = '';
     liveReply = '';
     liveTools = [];
   }
-  function setTyping(on) {
-    clearTimeout(typingTimer);
-    typing = on;
-    if (on) typingTimer = setTimeout(() => (typing = false), 90000);
-    else resetLive();
+  function setTyping(agent, on) {
+    if (!agent) return;
+    if (typingTimers[agent]) {
+      clearTimeout(typingTimers[agent]);
+      delete typingTimers[agent];
+    }
+    if (on) {
+      if (!typing.includes(agent)) typing = [...typing, agent];
+      typingTimers[agent] = setTimeout(() => {
+        typing = typing.filter((name) => name !== agent);
+        delete typingTimers[agent];
+      }, 90000);
+    } else {
+      typing = typing.filter((name) => name !== agent);
+    }
+  }
+  function resetTyping() {
+    Object.values(typingTimers).forEach(clearTimeout);
+    Object.keys(typingTimers).forEach((agent) => delete typingTimers[agent]);
+    typing = [];
+    workingResponders = [];
   }
 
   let sseAbort = null;
@@ -86,10 +108,12 @@
     }
     const p = env.payload || {};
     if (env.type === 'channel_typing') {
-      if (p.tier === tier && p.name === name) setTyping(p.state === 'start');
+      if (p.tier === tier && p.name === name) setTyping(String(p.agent || ''), p.state === 'start');
       return;
     }
     if (typeof p.chat_id !== 'string' || !p.chat_id.startsWith(`chan:${tier}:${name}:`)) return;
+    const agent = p.chat_id.slice(`chan:${tier}:${name}:`.length);
+    if (agent) setTyping(agent, true);
     if (env.type === 'thinking_chunk') liveThink += String(p.delta ?? '');
     else if (env.type === 'message_chunk') {
       if (p.role === 'assistant') liveReply += String(p.delta ?? '');
@@ -115,6 +139,7 @@
         getChannel(tier, name).catch(() => null),
         getChannelMessages(tier, name)
       ]);
+      workingResponders = Array.isArray(info?.active_responders) ? info.active_responders : [];
       error = '';
       await tick();
       scrollDown();
@@ -124,7 +149,13 @@
   }
   async function refresh() {
     try {
-      messages = await getChannelMessages(tier, name);
+      const [nextInfo, nextMessages] = await Promise.all([
+        getChannel(tier, name).catch(() => info),
+        getChannelMessages(tier, name)
+      ]);
+      info = nextInfo;
+      messages = nextMessages;
+      workingResponders = Array.isArray(info?.active_responders) ? info.active_responders : [];
     } catch (_) {}
   }
   function scrollDown() {
@@ -153,7 +184,7 @@
 
   $: if (tier && name && `${tier}/${name}` !== loadedKey) {
     loadedKey = `${tier}/${name}`;
-    typing = false;
+    resetTyping();
     resetLive();
     loadAll();
   }
@@ -164,7 +195,7 @@
   });
   onDestroy(() => {
     if (poll) clearInterval(poll);
-    clearTimeout(typingTimer);
+    resetTyping();
     sseAbort?.abort();
   });
 
@@ -211,15 +242,15 @@
     {/each}
   </div>
 
-  {#if typing && !hasLive}
-    <div class="typing">sta lavorando…</div>
+  {#if typingLabel && !hasLive}
+    <div class="typing">{typingLabel}</div>
   {/if}
   {#if hasLive}
     <div class="think" class:open={thinkOpen}>
       <button type="button" class="think-head" on:click={() => (thinkOpen = !thinkOpen)} aria-expanded={thinkOpen}>
         <span class="caret" class:open={thinkOpen}>▸</span>
         <span class="think-title">Ragionamento</span>
-        {#if typing}<span class="think-live">● live</span>{/if}
+        {#if typingLabel}<span class="think-live">● live</span>{/if}
         <span class="think-hint">{thinkOpen ? 'comprimi' : 'espandi'}</span>
       </button>
       {#if thinkOpen}
