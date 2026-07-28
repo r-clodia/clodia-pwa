@@ -244,38 +244,38 @@
 </div>
 
 <style>
-  .ch { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+  .ch { display: flex; flex-direction: column; width: 100%; max-width: 100%; height: 100%; min-height: 0; overflow-x: hidden; overflow-y: hidden; touch-action: pan-y; overscroll-behavior-x: none; }
   .chhead { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #1c2733; }
   .back { color: #ff6b3d; text-decoration: none; font-size: 26px; line-height: 1; }
   .title { font-weight: 700; font-size: 16px; }
   .err { color: #e85d75; font-size: 12px; padding: 6px 12px; }
-  .stream { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
-  .msg { max-width: 85%; background: #131a22; border: 1px solid #243040; border-radius: 12px; padding: 8px 11px; align-self: flex-start; }
+  .stream { flex: 1 1 auto; width: 100%; max-width: 100%; min-height: 0; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; overscroll-behavior-x: none; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+  .msg { min-width: 0; max-width: 85%; overflow-wrap: anywhere; word-break: break-word; background: #131a22; border: 1px solid #243040; border-radius: 12px; padding: 8px 11px; align-self: flex-start; }
   .msg.mine { align-self: flex-end; background: #1a2530; }
   .msg.ai { border-color: rgba(255,107,61,.35); }
   .mhead { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
   .mava { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
   .mauthor { font-weight: 700; font-size: 12px; }
   .mts { font-size: 10px; color: #7b8a99; }
-  .mbody { font-size: 14px; line-height: 1.45; }
+  .mbody { min-width: 0; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; font-size: 14px; line-height: 1.45; }
   .mbody :global(p) { margin: 0 0 .4em; }
   .mbody :global(p:last-child) { margin-bottom: 0; }
   .mbody :global(code) { background: rgba(255,255,255,.08); padding: 0 4px; border-radius: 3px; }
-  .mbody :global(pre) { background: #0b0f14; padding: 8px; border-radius: 6px; overflow-x: auto; }
+  .mbody :global(pre) { max-width: 100%; background: #0b0f14; padding: 8px; border-radius: 6px; overflow-x: auto; overflow-wrap: normal; word-break: normal; white-space: pre; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
   .mbody :global(a) { color: #6fb6ff; }
   .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .pill { background: transparent; border: 1px solid rgba(255,107,61,.5); color: #e6edf3; font-size: 12px; padding: 5px 11px; border-radius: 999px; }
   .empty { color: #7b8a99; text-align: center; margin-top: 24px; font-size: 13px; }
   .typing { flex: 0 0 auto; padding: 4px 14px; font-size: 12px; color: #7b8a99; font-style: italic; }
   /* Pannello "Ragionamento" live (comprimibile, di default aperto) */
-  .think { flex: 0 0 auto; margin: 4px 10px 8px; border: 1px solid #243040; border-radius: 10px; background: rgba(19,26,34,.7); max-height: 40vh; overflow: auto; }
+  .think { flex: 0 0 auto; min-width: 0; max-width: calc(100% - 20px); margin: 4px 10px 8px; border: 1px solid #243040; border-radius: 10px; background: rgba(19,26,34,.7); max-height: 40vh; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; overscroll-behavior-x: none; }
   .think-head { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: transparent; border: 0; color: #7b8a99; font: inherit; font-size: 11px; padding: 8px 11px; }
   .think-head .caret { transition: transform .15s ease; }
   .think-head .caret.open { transform: rotate(90deg); }
   .think-title { font-weight: 800; letter-spacing: .04em; text-transform: uppercase; font-size: 10px; }
   .think-live { color: #ff6b3d; font-weight: 800; font-size: 10px; }
   .think-hint { margin-left: auto; opacity: .7; font-size: 10px; }
-  .think-body { padding: 0 11px 11px; display: flex; flex-direction: column; gap: 8px; }
+  .think-body { min-width: 0; max-width: 100%; padding: 0 11px 11px; display: flex; flex-direction: column; gap: 8px; }
   .think-text { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, monospace; font-size: 11.5px; line-height: 1.5; color: #9fb0bf; }
   .think-tools { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
   .think-tools li { font-size: 11px; color: #9fb0bf; font-family: ui-monospace, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
