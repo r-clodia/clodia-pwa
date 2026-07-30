@@ -32,18 +32,30 @@
   let liveTools = [];
   let thinkOpen = true;
   let typing = false;
+  let typingAgent = '';
   let typingTimer;
   $: hasLive = !!(liveThink || liveReply || liveTools.length);
+  $: typingLabel = typingAgent ? `${typingAgent} sta scrivendo…` : 'sta scrivendo…';
   function resetLive() {
     liveThink = '';
     liveReply = '';
     liveTools = [];
   }
-  function setTyping(on) {
+  function agentFromChatId(chatId) {
+    if (typeof chatId !== 'string') return '';
+    const prefix = `chan:${tier}:${name}:`;
+    return chatId.startsWith(prefix) ? chatId.slice(prefix.length) : '';
+  }
+  function setTyping(on, agent = '') {
     clearTimeout(typingTimer);
     typing = on;
-    if (on) typingTimer = setTimeout(() => (typing = false), 90000);
-    else resetLive();
+    typingAgent = on ? (agent || typingAgent || '') : '';
+    if (on) {
+      typingTimer = setTimeout(() => {
+        typing = false;
+        typingAgent = '';
+      }, 90000);
+    } else resetLive();
   }
 
   let sseAbort = null;
@@ -86,10 +98,14 @@
     }
     const p = env.payload || {};
     if (env.type === 'channel_typing') {
-      if (p.tier === tier && p.name === name) setTyping(p.state === 'start');
+      if (p.tier === tier && p.name === name) setTyping(p.state === 'start', String(p.agent || ''));
       return;
     }
     if (typeof p.chat_id !== 'string' || !p.chat_id.startsWith(`chan:${tier}:${name}:`)) return;
+    const liveAgent = agentFromChatId(p.chat_id);
+    if ((env.type === 'thinking_chunk' || env.type === 'message_chunk' || env.type === 'tool_use') && liveAgent) {
+      setTyping(true, liveAgent);
+    }
     if (env.type === 'thinking_chunk') liveThink += String(p.delta ?? '');
     else if (env.type === 'message_chunk') {
       if (p.role === 'assistant') liveReply += String(p.delta ?? '');
@@ -154,6 +170,7 @@
   $: if (tier && name && `${tier}/${name}` !== loadedKey) {
     loadedKey = `${tier}/${name}`;
     typing = false;
+    typingAgent = '';
     resetLive();
     loadAll();
   }
@@ -212,7 +229,7 @@
   </div>
 
   {#if typing && !hasLive}
-    <div class="typing">sta lavorando…</div>
+    <div class="typing">{typingLabel}</div>
   {/if}
   {#if hasLive}
     <div class="think" class:open={thinkOpen}>
