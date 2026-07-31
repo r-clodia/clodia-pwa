@@ -64,3 +64,10 @@ export async function postChannelMessage(tier, name, content) {
   if (!r.ok) throw new Error(await r.text());
   return await r.json();
 }
+
+export async function getChannelAliases() {
+  const r = await fetch(`${BASE}/api/channel-aliases`, { headers: authHeaders() });
+  if (!r.ok) throw new Error(await r.text());
+  const d = await r.json();
+  return d?.aliases || {};
+}

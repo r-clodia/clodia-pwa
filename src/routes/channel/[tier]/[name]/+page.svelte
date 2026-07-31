@@ -4,7 +4,8 @@
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
   import { session, authHeaders } from '$lib/auth.js';
-  import { getChannel, getChannelMessages, postChannelMessage, agentPfpUrl } from '$lib/api.js';
+  import { getChannel, getChannelMessages, postChannelMessage, agentPfpUrl, getChannelAliases, listAgents } from '$lib/api.js';
+  import { expandChannelAliases } from '$lib/channelAliases.js';
 
   const BASE = (import.meta.env.VITE_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -22,6 +23,8 @@
   let streamEl;
   let poll;
   let missing = {};
+  let channelAliases = {};
+  let agentNames = [];
 
   // --- Ragionamento / attività live (SSE del turno del risponditore) -------
   // Il backend emette thinking_chunk / message_chunk / tool_use sul bus, con
@@ -127,9 +130,11 @@
 
   async function loadAll() {
     try {
-      [info, messages] = await Promise.all([
+      [info, messages, channelAliases, agentNames] = await Promise.all([
         getChannel(tier, name).catch(() => null),
-        getChannelMessages(tier, name)
+        getChannelMessages(tier, name),
+        getChannelAliases().catch(() => ({})),
+        listAgents().then((agents) => agents.map((agent) => agent.name)).catch(() => [])
       ]);
       error = '';
       await tick();
@@ -148,7 +153,10 @@
   }
 
   async function send(text) {
-    const body = (text ?? draft).trim();
+    const composed = text === undefined
+      ? expandChannelAliases(draft, channelAliases, agentNames)
+      : text;
+    const body = composed.trim();
     if (!body || sending) return;
     sending = true;
     draft = '';

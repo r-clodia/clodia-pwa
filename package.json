@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+	"test": "node --test tests/*.test.js",
     "dev": "vite dev --port 5174",
     "build": "vite build",
     "preview": "vite preview --port 4174",
