@@ -1,29 +1,38 @@
 # Clodia PWA
 
-Mobile-first PWA companion for Clodia.
+The mobile-first companion app for a Clodia colony: an installable PWA that
+talks to the **agent-server** over the same API the web UI uses.
 
-Current screen:
+It shows the topics you take part in, the agents and their profile pictures,
+the channels and direct messages, and it lets you download a topic's files.
 
-- Topics list
-- Collapsible topic cards
-- TLDR and open TODO previews rendered from Markdown
-- Contact agent with profile picture
+It is deliberately a **thin** client. It reads a topic's title and its messages
+and nothing else — not the participants, not the mounts, not the gates. That is
+why the model work of v9 (roles as a map, mounts as a collection, portability,
+what a gate crosses) required **no change here**: measured against the running
+instance on 9 Aug 2026, every endpoint it calls still exists and every field it
+reads is still there. A thin client is cheap to keep aligned, and that is the
+point of keeping it thin.
 
-> ### 📍 This is not the entry-point repo
+One thing to know for later: it addresses channels under the
+`/clodia/channels/…` prefix, which the platform intends to retire. When that
+happens, this repository has to move with it.
+
+> ### 📍 This is not the entry repository
 >
-> This repository is a **component** of Clodia Platform, not a standalone
-> installable product. The entry-point repo — install, quickstart, overall
-> architecture, licensing and **risk warnings** — is:
+> This repository is a **component** of Clodia Platform, not something you
+> install on its own. Installation, quickstart, architecture, licence and the
+> **risk warnings** live in:
 >
 > ### 👉 **[r-clodia/clodia-platform](https://github.com/r-clodia/clodia-platform)**
 >
-> Do not start here to deploy: `clodia-platform` clones the component repos,
+> Do not deploy from here: `clodia-platform` clones the component repositories,
 > builds the images and orchestrates the stack. Before installing, read the
 > as-is disclaimer and the **known defects** in the platform tracker —
 > [open `security` issues](https://github.com/r-clodia/clodia-platform/issues?q=is%3Aissue+is%3Aopen+label%3Asecurity)
 > and [`SECURITY.md`](https://github.com/r-clodia/clodia-platform/blob/main/SECURITY.md).
-> The software is distributed **AS-IS, without warranty of any kind**: you run
-> it at your own risk.
+> The software is distributed **AS IS, without warranty**: you run it at your
+> own risk.
 
 ## Development
 
@@ -60,9 +69,9 @@ PORT=5173 API_TARGET=http://127.0.0.1:7842 npm run start
 It serves `build/` with SPA fallback and proxies API prefixes to the local
 agent-server.
 
-## Licenza
+## Licence
 
 Copyright (C) 2026 Davide Carboni.
 
-GNU AGPL v3 — con opzione di licenza commerciale: vedi [LICENSING.md](LICENSING.md).
-Le versioni fino al tag `apache2-final` restano Apache 2.0.
+GNU AGPL v3, with a commercial option: see [LICENSING.md](LICENSING.md).
+Releases up to the `apache2-final` tag remain Apache 2.0.

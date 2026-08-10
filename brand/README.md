@@ -1,39 +1,42 @@
-# Asset di brand
+# Brand assets
 
-`logo-master.png` è **l'unica sorgente** del marchio. Tutto ciò che sta in
-`static/` con il logo dentro è generato da qui:
+`logo-master.png` is the **only** source of the mark. Everything in `static/`
+that carries the logo is generated from it:
 
 ```sh
 pip install 'Pillow>=10,<12'
-python3 scripts/gen-brand-assets.py          # rigenera static/
-python3 scripts/gen-brand-assets.py --check  # verifica (gira in CI)
+python3 scripts/gen-brand-assets.py          # regenerate static/
+python3 scripts/gen-brand-assets.py --check  # verify (runs in CI)
 ```
 
-Cosa produrre, con quali dimensioni e su quale fondo sta in `assets.json`;
-lo script è uguale in tutti i repo che servono il marchio, cambia solo il
-manifest.
+What to produce, at which sizes and over which background, lives in
+`assets.json`. The script is the same in every repository that serves the mark;
+only the manifest differs.
 
-## Perché una pipeline e non i file a mano
+## Why a pipeline rather than files by hand
 
-Un'immagine caricata in chat che diventa asset servito dalla UI attraversa un
-confine di fiducia (clodia-platform#101). Il master arriva da `gpt-image` e porta
-un chunk `caBX` (manifest C2PA, ~25 KB: provenance, certificati, `instanceID`) che
-non ha ragione di finire in produzione. Ogni output viene quindi **ridecodificato
-e riscritto da zero**, mai copiato: sopravvivono solo `IHDR`/`IDAT`/`IEND`.
-`--check` fa fallire la CI se un asset viene aggiornato a mano scavalcando il
-re-encode, o se un PNG committato reintroduce metadata o byte dopo `IEND`.
+An image uploaded in a chat that becomes an asset served by the UI crosses a
+trust boundary (clodia-platform#101). The master comes from `gpt-image` and
+carries a `caBX` chunk — a C2PA manifest of about 25 KB: provenance,
+certificates, `instanceID` — which has no business reaching production. Every
+output is therefore **re-decoded and rewritten from scratch**, never copied:
+only `IHDR`, `IDAT` and `IEND` survive.
 
-## Icone opache, non trasparenti
+`--check` fails CI if an asset is updated by hand, bypassing the re-encode, or
+if a committed PNG reintroduces metadata or bytes after `IEND`.
 
-`manifest.webmanifest` dichiara le icone `purpose: "any maskable"`: il sistema
-operativo le ritaglia in una forma propria, quindi devono essere a fondo pieno e
-con il contenuto dentro la safe zone. La pipeline le compone su `#101116` (lo
-stesso `theme_color` del manifest) con il ritratto all'80% del lato — prima erano
-PNG a fondo trasparente, che come maskable vengono resi male.
+## Opaque icons, not transparent ones
 
-## Se il master cambia
+`manifest.webmanifest` declares the icons as `purpose: "any maskable"`: the
+operating system crops them into a shape of its own, so they must be
+full-bleed with their content inside the safe zone. The pipeline composes them
+over `#101116` — the manifest's own `theme_color` — with the portrait at 80% of
+the side. They used to be PNGs on a transparent background, which render badly
+as maskable icons.
 
-Le finestre di ritaglio in `assets.json` sono coordinate fisse sul master. Lo
-script confronta il bounding box del contenuto con `geometry.content_bbox` e
-**fallisce** se non combacia, invece di produrre favicon ritagliate a caso: in
-quel caso ricalcola la geometria prima di rigenerare.
+## If the master changes
+
+The crop windows in `assets.json` are fixed coordinates on the master. The
+script compares the bounding box of the content with `geometry.content_bbox` and
+**fails** when they do not match, rather than producing favicons cropped at
+random. Recompute the geometry before regenerating.
