@@ -1,5 +1,18 @@
 # Clodia PWA
 
+> [!WARNING]
+> **DEPRECATED — this app is retired.** The Clodia PWA is retired as of the
+> platform release that closes
+> [r-clodia/clodia-platform#657](https://github.com/r-clodia/clodia-platform/issues/657):
+> the `pwa` service is no longer part of the platform's compose file, the
+> WebUI no longer offers "Dispositivo PWA" pairing, and the servers refuse
+> the 30-day pairing tokens this app was paired with.
+>
+> **Use the Clodia WebUI** (`clodia-web`) instead, on desktop and on mobile.
+>
+> This repository will be archived read-only and kept for history. No further
+> changes, fixes or releases will be made here.
+
 The mobile-first companion app for a Clodia colony: an installable PWA that
 talks to the **agent-server** over the same API the web UI uses.
 
